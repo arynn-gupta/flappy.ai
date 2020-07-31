@@ -8,6 +8,7 @@ import neat, os, pygame, random, pickle
 W_WIDTH = 400
 W_Height = 700
 WIN = pygame.display.set_mode((W_WIDTH, W_Height))
+pygame.display.set_caption("flappy.ai")
 
 #font
 pygame.font.init()
