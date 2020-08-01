@@ -138,7 +138,7 @@ class Pipe :
         return False
 
 class Ground :
-    VEL = 5
+    VEL = 6
     IMG = ground
     WIDTH = IMG.get_width()
 
@@ -222,7 +222,7 @@ class Trees :
         win.blit(self.IMG, (self.x2, self.y))
 
 class Cloud0 :
-    VEL = 5
+    VEL = 2
     IMG = clouds[0]
     WIDTH = IMG.get_width()
 
@@ -250,7 +250,7 @@ class Cloud0 :
         win.blit(self.IMG, (self.x2, self.y))
 
 class Cloud1 :
-    VEL = 5
+    VEL = 3
     IMG = clouds[1]
     WIDTH = IMG.get_width()
 
@@ -278,7 +278,7 @@ class Cloud1 :
         win.blit(self.IMG, (self.x2, self.y))
 
 class Cloud2 :
-    VEL = 5
+    VEL = 2
     IMG = clouds[2]
     WIDTH = IMG.get_width()
 
@@ -311,14 +311,23 @@ def blit_rotate(win, img, topleft, tilt) :
     win.blit(rotated_img, new_rect.topleft)
 
 def draw_window(win, birds, ground, grass, trees,cloud0, cloud1, cloud2, pipes, score, gen) :
+    alive = 0
     win.blit(bg, (0, 0))
     cloud0.draw(win)
     cloud1.draw(win)
     cloud2.draw(win)
     trees.draw(win)
     grass.draw(win)
+
     for bird in birds :
-        bird.draw(win)
+        if os.path.isfile('./model'): #draw only one bird if model is present
+            bird.draw(win)
+            alive += 1
+            break
+        else :
+            bird.draw(win)
+            alive += 1
+
     for pipe in pipes :
         pipe.draw(win)
     ground.draw(win)
@@ -326,7 +335,7 @@ def draw_window(win, birds, ground, grass, trees,cloud0, cloud1, cloud2, pipes, 
     # labels
     score_label = GameFont.render("Score : " + str(score), 1, (255, 50, 0))
     gen_label = GameFont.render("Gen : " + str(gen), 1, (72, 250, 174))
-    alive_label = GameFont.render("Alive : " + str(len(birds)), 1, (72, 255, 174))
+    alive_label = GameFont.render("Alive : " + str(alive), 1, (72, 255, 174))
     win.blit(score_label, (W_WIDTH - score_label.get_width() - 15, 10))
     win.blit(gen_label, (10, 10))
     win.blit(alive_label, (10, 50))
@@ -343,7 +352,11 @@ def eval_genome(genomes, config) :
 
     for genome_id, genome in genomes :
         genome.fitness = 0 # start genome with fitness level of 0
-        net = neat.nn.FeedForwardNetwork.create(genome, config) # create neural network for each genome
+        if os.path.isfile('./model') : #load neural network from model if present
+            with open('model', 'rb') as f :
+                net = pickle.load(f)
+        else :
+            net = neat.nn.FeedForwardNetwork.create(genome, config)  # create neural network for each genome
         nets.append(net)
         ge.append(genome)
         birds.append(Bird(round(W_WIDTH/3), round(W_Height/2.5)))
